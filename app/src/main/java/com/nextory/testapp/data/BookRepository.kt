@@ -15,7 +15,11 @@ class BookRepository @Inject constructor(
         }.flow
     }
 
-    suspend fun getBookById(id: Long): Book {
-        return bookDao.getBookById(id)!!
+    fun getBookById(id: Long): Flow<Book?> {
+        return bookDao.getBookById(id)
+    }
+
+    suspend fun bookmark(book: Book) {
+        bookDao.bookmark(book)
     }
 }

@@ -5,18 +5,19 @@ import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.SideEffect
 import androidx.compose.ui.graphics.Color
+import androidx.navigation.NavType
+import androidx.navigation.navArgument
 import com.google.accompanist.navigation.animation.AnimatedNavHost
 import com.google.accompanist.navigation.animation.composable
 import com.google.accompanist.navigation.animation.rememberAnimatedNavController
 import com.google.accompanist.navigation.material.ExperimentalMaterialNavigationApi
 import com.google.accompanist.navigation.material.rememberBottomSheetNavigator
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
-import com.nextory.testapp.ui.booklist.BookList
+import com.nextory.testapp.ui.bookdetails.BookDetailsScreen
+import com.nextory.testapp.ui.booklist.BookListScreen
 import com.nextory.testapp.ui.theme.TestAppTheme
+import com.nextory.testapp.ui.utils.Screen
 
-private sealed class Screen(val route: String) {
-    object BookList : Screen("book_list")
-}
 
 @OptIn(
     ExperimentalMaterialNavigationApi::class,
@@ -38,9 +39,27 @@ fun TestApp() {
         val bottomSheetNavigator = rememberBottomSheetNavigator()
         val navController = rememberAnimatedNavController(bottomSheetNavigator)
         AnimatedNavHost(navController, startDestination = Screen.BookList.route) {
+
             composable(route = Screen.BookList.route) {
-                BookList()
+                BookListScreen(
+                    onNavigate = {
+                        navController.navigate(it.route)
+                    }
+                )
             }
+
+            composable(
+                route = Screen.BookDetails.route
+
+            ) {
+
+
+                BookDetailsScreen() {
+                    navController.popBackStack()
+                }
+            }
+
+
         }
     }
 }

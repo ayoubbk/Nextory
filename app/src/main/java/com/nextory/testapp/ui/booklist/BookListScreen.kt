@@ -29,18 +29,31 @@ import coil.compose.AsyncImage
 import com.nextory.testapp.R
 import com.nextory.testapp.data.Book
 import com.nextory.testapp.ui.components.ListItem
+import com.nextory.testapp.ui.utils.UiEvent
 import com.nextory.testapp.ui.utils.rememberFlowWithLifecycle
 
 @Composable
-fun BookList(
-    bookListViewModel: BookListViewModel = hiltViewModel()
+fun BookListScreen(
+    bookListViewModel: BookListViewModel = hiltViewModel(),
+    onNavigate: (UiEvent.Navigate) -> Unit
 ) {
     val pagedBooks = rememberFlowWithLifecycle(bookListViewModel.pagedBooks)
         .collectAsLazyPagingItems()
+
+    LaunchedEffect(key1 = true) {
+        bookListViewModel.uiEvent.collect { event ->
+            when(event) {
+                is UiEvent.Navigate -> onNavigate(event)
+                else -> Unit
+            }
+        }
+    }
+
     BookList(
         pagedBooks = pagedBooks,
         onSearchTextChanged = {
-        }
+        },
+        bookListViewModel
     )
 }
 
@@ -52,8 +65,10 @@ fun BookList(
 @Composable
 private fun BookList(
     pagedBooks: LazyPagingItems<Book>,
-    onSearchTextChanged: (String) -> Unit = {}
+    onSearchTextChanged: (String) -> Unit = {},
+    viewModel: BookListViewModel,
 ) {
+
     Scaffold(topBar = { BookListTopBar() }) { paddingValues ->
         LazyColumn(
             modifier = Modifier.padding(paddingValues),
@@ -98,7 +113,7 @@ private fun BookList(
             }
 
             items(pagedBooks) { book ->
-                BookItem(book = book!!)
+                BookItem(book = book!!, viewModel = viewModel)
             }
         }
     }
@@ -117,9 +132,14 @@ private fun BookListTopBar() {
 }
 
 @Composable
-private fun BookItem(book: Book) {
+private fun BookItem(
+    book: Book,
+    viewModel: BookListViewModel
+) {
     ListItem(
-        modifier = Modifier.clickable { },
+        modifier = Modifier.clickable {
+            viewModel.onEvent(BookListEvent.OnBookClick(book))
+        },
         icon = {
             AsyncImage(
                 model = book.imageUrl,
